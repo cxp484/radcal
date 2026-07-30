@@ -2,34 +2,34 @@
 
 This reduced grid produces 20 valid gas compositions and 120 Kappa records.
 
+From the repository root, first change to the test directory:
+
+```bash
+cd Examples/NN_TEST
+```
+
 On macOS:
 
 ```bash
-cd Build/intel_osx_64
-source ../Scripts/set_compilers.sh
-make -f ../makefile clean
-make -f ../makefile intel_osx_64_nn VPATH=../../Source
-cd ../..
+../../Build/intel_osx_64/make_radcal_nn.sh
 ```
 
 On Linux:
 
 ```bash
-cd Build/intel_linux_64
-source ../Scripts/set_compilers.sh
-make -f ../makefile clean
-make -f ../makefile intel_linux_64_nn VPATH=../../Source
-cd ../..
+../../Build/intel_linux_64/make_radcal_nn.sh
 ```
 
-Generate the test database:
+Generate the test database on macOS:
 
 ```bash
-python3 Examples/NN_TEST/generate_nn_database.py \
-  Build/intel_osx_64/radcal_nn \
-  --input Examples/NN_TEST/RADCAL_NN_TEST.IN \
-  --output-prefix Examples/NN_TEST/radcal_nn_test
+python3 generate_nn_database.py \
+  ../../Build/intel_osx_64/radcal_nn \
+  --input RADCAL_NN_TEST.IN \
+  --output-prefix radcal_nn_test
 ```
+
+On Linux, replace `intel_osx_64` with `intel_linux_64`.
 
 The generated files are:
 
@@ -40,15 +40,13 @@ The generated files are:
 Read a training batch with:
 
 ```bash
-python3 Examples/NN_TEST/read_nn_database.py \
-  Examples/NN_TEST/radcal_nn_test_header.txt \
-  --start 0 --count 8
+python3 read_nn_database.py radcal_nn_test_header.txt --start 0 --count 8
 ```
 
 Plot nearest-available pure-species Planck mean curves with:
 
 ```bash
-python3 Examples/NN_TEST/plot_planck_mean.py \
-  Examples/NN_TEST/radcal_nn_test_header.txt \
-  --output Examples/NN_TEST/planck_mean_kappa.png
+python3 plot_planck_mean.py \
+  radcal_nn_test_header.txt \
+  --output planck_mean_kappa.png
 ```
