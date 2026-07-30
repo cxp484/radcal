@@ -71,11 +71,22 @@ Then generate the test database on macOS with:
 python3 generate_nn_database.py \
   ../../Build/intel_osx_64/radcal_nn \
   --input RADCAL_NN_TEST.IN \
-  --output-prefix radcal_nn_test
+  --output-prefix radcal_nn_test \
+  --processes 4
 \end{verbatim}
 
 On Linux, replace \texttt{intel\_osx\_64} with
 \texttt{intel\_linux\_64}.
+
+The \texttt{--processes} option accepts values from 1 through 44. Each MPI
+rank evaluates a different subset of temperatures and writes its results
+directly to the correct offsets in the shared Kappa file. A single process
+uses the same MPI code path. Values greater than 44 are automatically reduced
+to 44 by the Python launcher. The
+header, valid-gas index file, Kappa file layout, and Python reader are
+unchanged by the number of processes.
+When the requested process count exceeds the CPU slots available to Open MPI,
+add \texttt{--oversubscribe} to the Python command.
 
 \subsection{Input namelist}
 
@@ -153,8 +164,9 @@ and its byte offset is
 \operatorname{kappa\_byte\_offset}(t,g,s)=8r(t,g,s).
 \]
 
-For the retained test database, \(N_g=20\) and \(N_s=3\). For \(t=1\),
-\(g=3\), and \(s=1\),
+For the retained reduced MPI fixture generated from
+\texttt{RADCAL\_NN\_PROGRESS\_TEST.IN}, \(N_g=20\) and \(N_s=3\). For
+\(t=1\), \(g=3\), and \(s=1\),
 \[
 r=(1\cdot20+3)\cdot3+1=70,
 \]

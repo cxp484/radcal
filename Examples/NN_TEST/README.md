@@ -1,6 +1,9 @@
 # NN database test
 
-This reduced grid produces 20 valid gas compositions and 120 Kappa records.
+`RADCAL_NN_TEST.IN` contains the full 44-temperature configuration.
+`RADCAL_NN_PROGRESS_TEST.IN` is the retained reduced fixture used for fast
+serial and MPI validation; it produces 20 valid gas compositions and 120
+Kappa records.
 
 From the repository root, first change to the test directory:
 
@@ -26,10 +29,15 @@ Generate the test database on macOS:
 python3 generate_nn_database.py \
   ../../Build/intel_osx_64/radcal_nn \
   --input RADCAL_NN_TEST.IN \
-  --output-prefix radcal_nn_test
+  --output-prefix radcal_nn_test \
+  --processes 4
 ```
 
 On Linux, replace `intel_osx_64` with `intel_linux_64`.
+`--processes` may be any integer from 1 through 44. Temperatures are assigned
+to MPI ranks. Values greater than 44 are automatically reduced to 44.
+Add `--oversubscribe` when requesting more processes than the local machine
+provides as CPU slots.
 
 The generated files are:
 
