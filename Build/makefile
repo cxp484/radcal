@@ -42,6 +42,7 @@ GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 # Definition of the non-MPI object variables
 
 obj_serial = rmod.o rcal.o main.o
+obj_nn = rmod.o rcal.o nn_database.o
 
 objwin_serial = $(obj_serial:.o=.obj)
 
@@ -111,10 +112,25 @@ intel_osx_64_db : obj = radcal_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
+# NN targets
+intel_linux_64_nn : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) -DUSE_IFPORT -diag-disable=10448
+intel_linux_64_nn : LFLAGS = -static-intel
+intel_linux_64_nn : FCOMPL = $(COMP_FC)
+intel_linux_64_nn : obj = radcal_nn
+intel_linux_64_nn : setup $(obj_nn)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_nn)
+
+intel_osx_64_nn : FFLAGS = -m64 -O2 $(GITINFOGNU)
+intel_osx_64_nn : FCOMPL = $(COMP_FC)
+intel_osx_64_nn : obj = radcal_nn
+intel_osx_64_nn : setup $(obj_nn)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_nn)
+
 # *** Object Dependencies ***
 
 rcal.o : rmod.o
 main.o : rmod.o rcal.o
+nn_database.o : rmod.o rcal.o
 
 rcal.obj : rmod.obj
 main.obj : rmod.obj rcal.obj
@@ -128,4 +144,3 @@ clean:
 .PHONY : winclean
 winclean:
 	-erase *.mod *.obj
-

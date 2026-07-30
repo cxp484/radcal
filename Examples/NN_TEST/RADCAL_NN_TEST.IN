@@ -1,0 +1,11 @@
+&NN_INPUT
+   KAPPA_X_MIN = 1.E-5
+   KAPPA_X_MAX = 1.0
+   KAPPA_C_MIN = 2.E-7
+   KAPPA_C_MAX = 0.2
+   N_KAPPA_X = 51
+   N_KAPPA_C = 51
+   RTMPMIN = 270.0
+   RTMPMAX = 2470.0
+   N_RTMP = 44
+/
