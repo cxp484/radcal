@@ -78,11 +78,11 @@ python3 generate_nn_database.py \
 On Linux, replace \texttt{intel\_osx\_64} with
 \texttt{intel\_linux\_64}.
 
-The \texttt{--processes} option accepts values from 1 through 44. Each MPI
-rank evaluates a different subset of temperatures and writes its results
-directly to the correct offsets in the shared Kappa file. A single process
-uses the same MPI code path. Values greater than 44 are automatically reduced
-to 44 by the Python launcher. The
+Each MPI rank evaluates a different subset of temperatures and writes its
+results directly to the correct offsets in the shared Kappa file. A single
+process uses the same MPI code path. If \texttt{--processes} exceeds the
+\texttt{N\_RTMP} value in the input namelist, the Python launcher
+automatically reduces it to \texttt{N\_RTMP}. The
 header, valid-gas index file, Kappa file layout, and Python reader are
 unchanged by the number of processes.
 When the requested process count exceeds the CPU slots available to Open MPI,

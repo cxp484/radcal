@@ -34,8 +34,9 @@ python3 generate_nn_database.py \
 ```
 
 On Linux, replace `intel_osx_64` with `intel_linux_64`.
-`--processes` may be any integer from 1 through 44. Temperatures are assigned
-to MPI ranks. Values greater than 44 are automatically reduced to 44.
+Temperatures are assigned to MPI ranks. If `--processes` is greater than the
+`N_RTMP` value in the input namelist, it is automatically reduced to
+`N_RTMP`.
 Add `--oversubscribe` when requesting more processes than the local machine
 provides as CPU slots.
 

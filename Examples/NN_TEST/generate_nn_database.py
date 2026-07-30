@@ -1,5 +1,14 @@
 import argparse
+import re
 import subprocess
+from pathlib import Path
+
+
+def temperature_count(filename):
+    text = Path(filename).read_text()
+    text = "\n".join(line.split("!", 1)[0] for line in text.splitlines())
+    match = re.search(r"\bN_RTMP\s*=\s*(\d+)", text, re.IGNORECASE)
+    return int(match.group(1)) if match else 44
 
 
 def main():
@@ -13,9 +22,10 @@ def main():
     a = p.parse_args()
     if a.processes < 1:
         p.error("--processes must be at least 1")
-    if a.processes > 44:
-        print(f"Requested {a.processes} processes; using the maximum of 44.", flush=True)
-        a.processes = 44
+    n_temperature = temperature_count(a.input)
+    if a.processes > n_temperature:
+        print(f"Requested {a.processes} processes; using N_RTMP={n_temperature}.", flush=True)
+        a.processes = n_temperature
 
     command = [a.executable]
     if a.processes > 1:
