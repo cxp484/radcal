@@ -79,7 +79,7 @@ def main():
         )
         k_db = np.asarray(data.kappa[:, gas_index, zero_soot, 0]) * 100.0
         plt.plot(t_ref, k_ref, "--", linewidth=2.5,
-                 color=COLORS[species], label=f"{species} file")
+                 color=COLORS[species], label=f"{species} FDS")
         plt.plot(data.temperature, k_db, "s-", markevery=5, linewidth=2,
                  color=COLORS[species], label=f"{species} database")
         print(f"{species}: database x={fraction:.7g}, file x={source_fraction:.7g}")
@@ -90,7 +90,7 @@ def main():
     )
     k_db = np.asarray(data.kappa[:, zero_gas, soot_index, 0]) * 100.0
     plt.plot(t_ref, k_ref, "--", linewidth=2.5,
-             color=COLORS["SOOT"], label="SOOT file")
+             color=COLORS["SOOT"], label="SOOT FDS")
     plt.plot(data.temperature, k_db, "s-", markevery=5, linewidth=2,
              color=COLORS["SOOT"], label="SOOT database")
     print(f"SOOT: database fv={soot_fraction:.7g}, file fv={source_fraction:.7g}")
