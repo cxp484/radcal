@@ -1,6 +1,7 @@
 # NN database test
 
-`RADCAL_NN_TEST.IN` contains the full 44-temperature configuration.
+`RADCAL_TRAINING_DATA_GENERATION/RADCAL_NN_TEST.IN` contains the full
+44-temperature configuration.
 `RADCAL_NN_PROGRESS_TEST.IN` is the retained reduced fixture used for fast
 serial and MPI validation; it produces 20 valid gas compositions and 120
 Kappa records.
@@ -26,8 +27,9 @@ On Linux:
 Generate the test database on macOS:
 
 ```bash
+cd RADCAL_TRAINING_DATA_GENERATION
 python3 generate_nn_database.py \
-  ../../Build/intel_osx_64/radcal_nn \
+  ../../../Build/intel_osx_64/radcal_nn \
   --input RADCAL_NN_TEST.IN \
   --output-prefix radcal_nn_test \
   --processes 4
@@ -46,16 +48,24 @@ The generated files are:
 - `radcal_nn_test_valid_gas_indices.bin`
 - `radcal_nn_test_kappa.bin`
 
+Return to the NN test directory:
+
+```bash
+cd ..
+```
+
 Read a training batch with:
 
 ```bash
-python3 read_nn_database.py radcal_nn_test_header.txt --start 0 --count 8
+python3 VERIFICATION_TRAINING_DATA_WITH_FDS/read_nn_database.py \
+  RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
+  --start 0 --count 8
 ```
 
 Plot nearest-available pure-species Planck mean curves with:
 
 ```bash
-python3 plot_planck_mean.py \
-  radcal_nn_test_header.txt \
+python3 VERIFICATION_TRAINING_DATA_WITH_FDS/compare_planck_mean.py \
+  RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
   --output planck_mean_kappa.png
 ```
