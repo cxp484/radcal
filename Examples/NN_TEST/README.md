@@ -69,3 +69,11 @@ python3 VERIFICATION_TRAINING_DATA_WITH_FDS/compare_planck_mean.py \
   RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
   --output planck_mean_kappa.png
 ```
+
+Compare 10 cm path-length Kappa at 1500 K with:
+
+```bash
+python3 VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm.py \
+  RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
+  --output VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm_1500K.png
+```
