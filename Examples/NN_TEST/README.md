@@ -78,6 +78,20 @@ python3 VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm.py \
   --output VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm_1500K.png
 ```
 
+Generate direct RADCAL verification values and compare them exactly with the
+database:
+
+```bash
+cd VERIFICATION_TRAINING_DATA_WITH_FDS
+chmod +x build_direct_verification.sh
+./build_direct_verification.sh
+./generate_direct_verification \
+  ../RADCAL_TRAINING_DATA_GENERATION/RADCAL_NN_TEST.IN .
+python3 compare_direct_verification.py \
+  ../RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt
+cd ..
+```
+
 Train a neural network for 10 cm Kappa with:
 
 ```bash

@@ -1,6 +1,9 @@
 import argparse
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 
 from read_nn_database import RadcalNNDataset
@@ -16,9 +19,22 @@ def gas_lookup(data):
     return {tuple(row): i for i, row in enumerate(data.gas_indices)}
 
 
-def check(name, direct, database):
+def check(name, x, direct, database, xlabel, ylabel, plot_directory):
     direct = np.asarray(direct, dtype=np.float32)
     database = np.asarray(database, dtype=np.float32)
+    filename = name.lower().replace(" ", "_").replace(",", "").replace("/", "_")
+    plt.figure(figsize=(8, 6))
+    plt.plot(x, direct, "-", linewidth=2.5, label="Direct RADCAL")
+    plt.plot(x, database, "o", markersize=7, markerfacecolor="none",
+             markeredgewidth=1.5, label="Database")
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(name)
+    plt.grid(True, alpha=0.3)
+    plt.legend(frameon=False)
+    plt.tight_layout()
+    plt.savefig(plot_directory / f"{filename}.png", dpi=200)
+    plt.close()
     if not np.array_equal(direct, database):
         error = np.max(np.abs(direct - database))
         raise AssertionError(f"{name}: values differ; maximum error={error:.8e}")
@@ -29,7 +45,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("header")
     parser.add_argument("--direct-directory", type=Path, default=HERE)
+    parser.add_argument("--plot-directory", type=Path,
+                        default=HERE / "direct_comparison_plots")
     args = parser.parse_args()
+    args.plot_directory.mkdir(parents=True, exist_ok=True)
 
     data = RadcalNNDataset(args.header)
     lookup = gas_lookup(data)
@@ -46,13 +65,15 @@ def main():
         indices = [0, 0, 0, 0]
         indices[column] = n_axis - 1
         record = lookup[tuple(indices)]
-        check(f"{species} Planck", direct[:, 3],
-              data.kappa[:, record, zero_soot, 0])
+        check(f"{species} Planck", direct[:, 1], direct[:, 3],
+              data.kappa[:, record, zero_soot, 0], "Temperature (K)",
+              r"Planck-mean $\kappa$ (cm$^{-1}$)", args.plot_directory)
 
     direct = np.loadtxt(args.direct_directory / "direct_SOOT_planck.dat")
     soot_index = int(np.argmin(np.abs(data.soot_fraction - direct[0, 2])))
-    check("SOOT Planck", direct[:, 3],
-          data.kappa[:, zero_gas, soot_index, 0])
+    check("SOOT Planck", direct[:, 1], direct[:, 3],
+          data.kappa[:, zero_gas, soot_index, 0], "Temperature (K)",
+          r"Planck-mean $\kappa$ (cm$^{-1}$)", args.plot_directory)
 
     for column, species in enumerate(SPECIES):
         direct = np.loadtxt(args.direct_directory / f"direct_{species}_kappa10cm.dat")
@@ -61,25 +82,33 @@ def main():
             indices = [0, 0, 0, 0]
             indices[column] = axis_index
             records.append(lookup[tuple(indices)])
-        check(f"{species} 10 cm", direct[:, 2],
-              data.kappa[temperature_index, records, zero_soot, 1])
+        check(f"{species} 10 cm", direct[:, 1], direct[:, 2],
+              data.kappa[temperature_index, records, zero_soot, 1],
+              "Mole fraction", r"10 cm $\kappa$ (cm$^{-1}$)",
+              args.plot_directory)
 
     direct = np.loadtxt(args.direct_directory / "direct_SOOT_kappa10cm.dat")
-    check("SOOT 10 cm", direct[:, 2],
-          data.kappa[temperature_index, zero_gas, direct[:, 0].astype(int), 1])
+    check("SOOT 10 cm", direct[:, 1], direct[:, 2],
+          data.kappa[temperature_index, zero_gas, direct[:, 0].astype(int), 1],
+          "Soot volume fraction", r"10 cm $\kappa$ (cm$^{-1}$)",
+          args.plot_directory)
 
     direct = np.loadtxt(args.direct_directory / "direct_CO2_H2O_kappa10cm.dat")
     records = [
         lookup[(co2_index, h2o_axis, 0, 0)]
         for h2o_axis in direct[:, 0].astype(int)
     ]
-    check("fixed CO2, varying H2O 10 cm", direct[:, 2],
-          data.kappa[temperature_index, records, zero_soot, 1])
+    check("fixed CO2, varying H2O 10 cm", direct[:, 1], direct[:, 2],
+          data.kappa[temperature_index, records, zero_soot, 1],
+          "H2O mole fraction", r"10 cm $\kappa$ (cm$^{-1}$)",
+          args.plot_directory)
 
     direct = np.loadtxt(args.direct_directory / "direct_CO2_H2O_SOOT_kappa10cm.dat")
     record = lookup[(co2_index, h2o_index, 0, 0)]
-    check("fixed CO2/H2O, varying SOOT 10 cm", direct[:, 2],
-          data.kappa[temperature_index, record, direct[:, 0].astype(int), 1])
+    check("fixed CO2/H2O, varying SOOT 10 cm", direct[:, 1], direct[:, 2],
+          data.kappa[temperature_index, record, direct[:, 0].astype(int), 1],
+          "Soot volume fraction", r"10 cm $\kappa$ (cm$^{-1}$)",
+          args.plot_directory)
 
 
 if __name__ == "__main__":
