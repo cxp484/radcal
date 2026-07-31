@@ -77,3 +77,21 @@ python3 VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm.py \
   RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
   --output VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm_1500K.png
 ```
+
+Train a neural network for 10 cm Kappa with:
+
+```bash
+python3 -m pip install -r NN_TRAINING/PyTorch/requirements.txt
+python3 NN_TRAINING/PyTorch/train_kappa_10cm.py \
+  RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
+  --output NN_TRAINING/PyTorch/kappa_10cm_model.pt
+```
+
+The equivalent TensorFlow training command is:
+
+```bash
+python3 -m pip install -r NN_TRAINING/TensorFlow/requirements.txt
+python3 NN_TRAINING/TensorFlow/train_kappa_10cm.py \
+  RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
+  --output NN_TRAINING/TensorFlow/kappa_10cm_model.keras
+```

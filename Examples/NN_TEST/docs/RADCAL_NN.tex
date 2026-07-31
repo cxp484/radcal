@@ -185,6 +185,49 @@ memory-maps both binary files, reconstructs physical input values from their
 indices, and returns batches without loading the complete database into
 memory.
 
+The constructor \texttt{\_\_init\_\_} runs when a
+\texttt{RadcalNNDataset} object is created. It reads the dimensions and axis
+tables from the header, resolves the binary-file paths, and opens the gas-index
+and Kappa files with \texttt{numpy.memmap}. A memory map behaves like a NumPy
+array, but the operating system reads only the portions of the files that are
+accessed.
+
+\subsection{Record reconstruction}
+
+The variable \texttt{size} is the total number of database records:
+
+\[
+N_{\mathrm{records}}=N_T\,N_g\,N_s,
+\]
+
+where \(N_T\), \(N_g\), and \(N_s\) are the numbers of temperatures, valid gas
+compositions, and soot values. For a flattened record number \(r\), the reader
+recovers the three database indices using
+
+\[
+s=r\bmod N_s,\qquad
+g=\left\lfloor\frac{r}{N_s}\right\rfloor\bmod N_g,\qquad
+t=\left\lfloor\frac{r}{N_sN_g}\right\rfloor.
+\]
+
+Thus soot changes fastest, gas composition changes next, and temperature
+changes slowest. The gas-index record then maps \(g\) to the four gas-axis
+indices for \(\mathrm{CO_2}\), \(\mathrm{H_2O}\), \(\mathrm{CO}\), and
+\(\mathrm{C_2H_4}\).
+
+\subsection{Inputs, targets, and batches}
+
+The method \texttt{batch(start,count)} returns two two-dimensional arrays.
+For a batch containing \(B\) records, \texttt{inputs} has shape \(B\times7\),
+with columns temperature, pressure, \(\mathrm{CO_2}\), \(\mathrm{H_2O}\),
+\(\mathrm{CO}\), soot volume fraction, and \(\mathrm{C_2H_4}\).
+\texttt{targets} has shape \(B\times2\), with Planck-mean Kappa in column 0
+and 10~cm Kappa in column 1.
+
+The method \texttt{batches(batch\_size)} uses Python's \texttt{yield} statement
+to return one batch at a time. This allows neural-network training to loop over
+a database much larger than the available memory.
+
 Inspect a batch from the command line with:
 
 \begin{verbatim}
