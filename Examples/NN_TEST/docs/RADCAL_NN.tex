@@ -258,4 +258,89 @@ The input columns are temperature, pressure, \(\mathrm{CO_2}\),
 \(\mathrm{C_2H_4}\). The target columns are Planck mean Kappa and 10~cm
 path-length-specific Kappa.
 
+\section{Direct Database Verification with RADCAL}
+
+The direct verification program is
+\path{Examples/NN_TEST/VERIFICATION_TRAINING_DATA_WITH_FDS/%
+generate_direct_verification.f90}. It calls RADCAL directly using the same
+10~cm path length, pressure, wall temperature, spectral limits, and
+discretization rules as the database generator. The program reads
+\texttt{RADCAL\_NN\_TEST.IN} and writes small text files for the following
+checks:
+
+\begin{enumerate}
+   \item Planck-mean Kappa versus the complete temperature axis for pure
+         \(\mathrm{CO_2}\), \(\mathrm{H_2O}\), \(\mathrm{CO}\), and
+         \(\mathrm{C_2H_4}\), and for soot near \(f_v=10^{-5}\).
+   \item 10~cm Kappa versus the complete gas or soot axis at the temperature
+         nearest 1527~K, with all other species set to zero.
+   \item At the temperature nearest 1527~K, 10~cm Kappa versus
+         \(\mathrm{H_2O}\) with
+         \(x_{\mathrm{CO_2}}\) fixed near
+         \(8.1854673070690193\times10^{-2}\).
+   \item At the temperature nearest 1527~K, 10~cm Kappa versus soot volume
+         fraction with \(x_{\mathrm{CO_2}}\) fixed near
+         \(8.1854673070690193\times10^{-2}\) and
+         \(x_{\mathrm{H_2O}}\) fixed near
+         \(4.9619476030029037\times10^{-2}\).
+\end{enumerate}
+
+The requested temperature and fixed mole fractions are mapped to the nearest
+values on the configured database axes. For the 22-temperature and 25-point
+configuration, these values are approximately 1527.14286~K,
+\(x_{\mathrm{CO_2}}=8.18546731\times10^{-2}\), and
+\(x_{\mathrm{H_2O}}=4.96194760\times10^{-2}\). The direct results are converted
+to the same 32-bit floating-point representation stored in the binary Kappa
+file.
+
+\subsection{Build and generate direct results}
+
+From the repository root, run:
+
+\begin{verbatim}
+cd Examples/NN_TEST/VERIFICATION_TRAINING_DATA_WITH_FDS
+chmod +x build_direct_verification.sh
+./build_direct_verification.sh
+./generate_direct_verification \
+  ../RADCAL_TRAINING_DATA_GENERATION/RADCAL_NN_TEST.IN .
+\end{verbatim}
+
+The default build uses \texttt{gfortran}. To use another compiler, pass its
+command to the build script. For example:
+
+\begin{verbatim}
+./build_direct_verification.sh ifort
+\end{verbatim}
+
+Using the same compiler options as the database build minimizes numerical
+differences before conversion to 32-bit storage.
+
+\subsection{Plot and compare with the database}
+
+Run the Python comparison from the same directory:
+
+\begin{verbatim}
+python3 compare_direct_verification.py \
+  ../RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt
+\end{verbatim}
+
+The reader locates the gas-index and Kappa binary files relative to the header.
+For every direct result, it reconstructs the matching temperature, valid-gas,
+and soot indices and reads the corresponding database value.
+
+The comparison script first creates all 12 overlay plots in
+\texttt{direct\_comparison\_plots}. Direct RADCAL values are shown as solid
+lines, and database values are shown as open-circle markers. Only after every
+plot has been written does the script report the complete PASS/FAIL summary.
+If one or more comparisons differ, a final assertion lists every failed case
+and its maximum absolute error instead of stopping at the first mismatch.
+
+To select a different plot directory, use:
+
+\begin{verbatim}
+python3 compare_direct_verification.py \
+  ../RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
+  --plot-directory my_verification_plots
+\end{verbatim}
+
 \end{document}
