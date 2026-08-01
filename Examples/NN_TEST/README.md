@@ -78,8 +78,8 @@ python3 VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm.py \
   --output VERIFICATION_TRAINING_DATA_WITH_FDS/compare_kappa_10cm_1500K.png
 ```
 
-Generate direct RADCAL verification values and compare them exactly with the
-database:
+Generate direct RADCAL verification values and compare them with the database
+using `rtol=1e-6` and `atol=1e-8`:
 
 ```bash
 cd VERIFICATION_TRAINING_DATA_WITH_FDS

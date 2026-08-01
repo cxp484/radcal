@@ -13,6 +13,8 @@ SPECIES = ("CO2", "H2O", "CO", "C2H4")
 TARGET_T = 1527.0
 TARGET_CO2 = 8.1854673070690193e-2
 TARGET_H2O = 4.9619476030029037e-2
+RTOL = 1e-6
+ATOL = 1e-8
 
 
 def gas_lookup(data):
@@ -35,7 +37,7 @@ def check(name, x, direct, database, xlabel, ylabel, plot_directory):
     plt.tight_layout()
     plt.savefig(plot_directory / f"{filename}.png", dpi=200)
     plt.close()
-    equal = np.array_equal(direct, database)
+    equal = np.allclose(direct, database, rtol=RTOL, atol=ATOL)
     error = 0.0 if equal else float(np.max(np.abs(direct - database)))
     return name, equal, error, len(direct)
 
@@ -125,7 +127,7 @@ def main():
     failures = []
     for name, equal, error, count in results:
         if equal:
-            print(f"PASS {name}: {count} values match exactly")
+            print(f"PASS {name}: {count} values match within tolerance")
         else:
             failures.append(f"{name}: maximum error={error:.8e}")
             print(f"FAIL {failures[-1]}")

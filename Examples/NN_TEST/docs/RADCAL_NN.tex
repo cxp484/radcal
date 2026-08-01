@@ -332,8 +332,14 @@ The comparison script first creates all 12 overlay plots in
 \texttt{direct\_comparison\_plots}. Direct RADCAL values are shown as solid
 lines, and database values are shown as open-circle markers. Only after every
 plot has been written does the script report the complete PASS/FAIL summary.
-If one or more comparisons differ, a final assertion lists every failed case
-and its maximum absolute error instead of stopping at the first mismatch.
+Values are considered equal using a relative tolerance of \(10^{-6}\) and an
+absolute tolerance of \(10^{-8}\):
+\[
+|a-b|\leq 10^{-8}+10^{-6}|b|.
+\]
+If one or more comparisons exceed this tolerance, a final assertion lists
+every failed case and its maximum absolute error instead of stopping at the
+first mismatch.
 
 To select a different plot directory, use:
 
