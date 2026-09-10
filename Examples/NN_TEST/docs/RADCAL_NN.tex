@@ -349,4 +349,63 @@ python3 compare_direct_verification.py \
   --plot-directory my_verification_plots
 \end{verbatim}
 
+\subsubsection{FDS-style K10 lookup comparison}
+
+The program \texttt{generate\_pl10cm\_lookup.f90} compares a lookup-table
+estimate of the 10~cm absorption coefficient, \(\kappa_{10\,\mathrm{cm}}\),
+with the direct RADCAL values already stored by \texttt{nn\_database.f90}.
+The direct values are not recomputed by this comparison. The program reads
+each binary record as the Planck-mean coefficient followed by the direct
+10~cm coefficient, and uses the latter as the reference value.
+
+The lookup construction and query reproduce the relevant behavior in
+\texttt{fds/Source/radi.f90}: 50 logarithmically spaced composition entries
+stored in slots 1--50, a zero-valued slot 0 for below-range composition,
+45 temperature slices selected by floor-and-clamp, linear interpolation in
+composition only. For a like-for-like comparison with \texttt{nn\_database.f90},
+the table stores \texttt{AMEAN} directly rather than FDS's
+\texttt{MIN(AMEAN,AP0)} value. The comparison retains \(\mathrm{cm^{-1}}\)
+units because the NN database is stored in these units; FDS converts its
+completed lookup table to \(\mathrm{m^{-1}}\) for use in the solver.
+
+Build and run the comparison from the verification directory:
+
+\begin{verbatim}
+chmod +x build_pl10cm_lookup.sh
+./build_pl10cm_lookup.sh
+./generate_pl10cm_lookup \
+  ../RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_header.txt \
+  ../RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_valid_gas_indices.bin \
+  ../RADCAL_TRAINING_DATA_GENERATION/radcal_nn_test_kappa.bin
+\end{verbatim}
+
+This writes \texttt{fds\_lookup\_comparison.csv}, which contains mean and
+maximum absolute percent error at each temperature, and a bounded sample of
+direct-versus-lookup pairs in \texttt{fds\_lookup\_scatter.csv}, to the
+directory from which the program is run.
+
+\paragraph{Temperature-interpolated option}
+
+The program also writes
+\texttt{fds\_lookup\_scatter\_temperature\_interpolated.csv}. It evaluates
+the same composition interpolation as the FDS-style lookup, but linearly
+interpolates between the two surrounding temperature slices. In contrast, the
+FDS-style result uses the lower, floor-and-clamp temperature index. The
+interpolated result is therefore an accuracy comparison option, not an
+emulation of \texttt{GET\_KAPPA} in FDS. Comparing the two isolates the error
+introduced by the 50~K table-temperature spacing.
+
+Create the two linear scatter plots with:
+
+\begin{verbatim}
+python3 plot_fds_lookup_comparison.py fds_lookup_scatter.csv
+\end{verbatim}
+
+The resulting \texttt{fds\_lookup\_vs\_direct\_fds\_linear.png} and
+\texttt{fds\_lookup\_vs\_direct\_temperature\_interpolated\_linear.png}
+show the FDS floor-and-clamp lookup and the temperature-interpolated lookup,
+respectively. The script automatically reads the interpolated scatter file
+from the same directory. The diagonal indicates exact agreement between the
+lookup result and the direct database value.
+
 \end{document}
